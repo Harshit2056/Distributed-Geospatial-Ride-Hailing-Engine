@@ -3,7 +3,16 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiError.js';
 import { AuthService } from '../services/auth.service.js';
-import { UserRole } from '../types/auth.types.js';
+import { UserRole, AuthRequest, User } from '../types/auth.types.js';
+import { pool } from '../config/db.js';
+
+// Production Cookie Settings
+const cookieOptions = {
+  httpOnly: true, // JavaScript client-side is cookie ko chori nahi kar sakta (XSS protection)
+  secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+  sameSite: 'strict' as const, // CSRF attacks prevention
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Days in milliseconds
+};
 
 export class AuthController {
   static register = asyncHandler(async (req: Request, res: Response) => {
@@ -30,8 +39,72 @@ export class AuthController {
 
     const authData = await AuthService.loginUser(email, password);
 
+    
+
+    // Refresh token ko direct HTTP-Only cookie mein attach karna
+    res.cookie('refreshToken', authData.tokens.refreshToken, cookieOptions);
+
     return res.status(200).json(
-      new ApiResponse(200, authData, 'User logged in successfully')
+      new ApiResponse(
+        200,
+        {
+          accessToken: authData.tokens.accessToken,
+          user: authData.user,
+        },
+        'User logged in successfully'
+      )
     );
   });
+
+  static refresh = asyncHandler(async (req: Request, res: Response) => {
+
+    const incomingRefreshToken =
+      req.cookies?.refreshToken ||
+      req.headers['x-refresh-token'] ||
+      req.body?.refreshToken;
+
+    if (!incomingRefreshToken) {
+      throw new ApiError(401, 'Refresh token not found in cookies or headers');
+    }
+
+    const newTokens = await AuthService.refreshAccessToken(incomingRefreshToken as string);
+
+    // Naya refresh token wapas cookie mein replace kar do (Token Rotation)
+    res.cookie('refreshToken', newTokens.refreshToken, cookieOptions);
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        { accessToken: newTokens.accessToken },
+        'Access token refreshed successfully'
+      )
+    );
+  });
+
+  static logout = asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (req.user?.userId) {
+      await AuthService.logoutUser(req.user.userId);
+    }
+
+    // Cookie ko destroy/clear karna
+    res.clearCookie('refreshToken', cookieOptions);
+
+    return res.status(200).json(
+      new ApiResponse(200, null, 'User logged out successfully')
+    );
+  });
+
+static getCurrentUser = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    throw new ApiError(401, 'Unauthorized request: Missing user identity');
+  }
+
+  const user = await AuthService.getUserById(userId);
+
+  return res.status(200).json(
+    new ApiResponse(200, user, 'Current user profile fetched successfully')
+  );
+});
 }

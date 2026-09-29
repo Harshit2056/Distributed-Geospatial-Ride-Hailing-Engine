@@ -12,13 +12,14 @@ export const verifyJWT = asyncHandler(async (req: AuthRequest, _res: Response, n
   }
 
   const token = authHeader.split(' ')[1];
-  const secret = process.env.JWT_SECRET || 'fallback_secret';
+  const secret = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
 
   try {
     const decoded = jwt.verify(token, secret) as JwtPayload;
     req.user = decoded;
     next();
-  } catch (error) {
+  } catch (error: any) {
+    console.error('JWT Verification Error:', error.name, error.message);
     throw new ApiError(401, 'Invalid or expired access token');
   }
 });

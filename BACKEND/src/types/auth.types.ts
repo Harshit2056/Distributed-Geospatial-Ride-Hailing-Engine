@@ -8,6 +8,7 @@ export interface User {
   email: string;
   password_hash: string;
   role: UserRole;
+  refresh_token?: string | null;
   created_at: Date;
 }
 
@@ -18,4 +19,9 @@ export interface JwtPayload {
 
 export interface AuthRequest extends Request {
   user?: JwtPayload;
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
 }
