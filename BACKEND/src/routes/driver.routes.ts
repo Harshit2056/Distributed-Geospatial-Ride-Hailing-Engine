@@ -4,7 +4,7 @@ import { verifyJWT, authorizeRole } from '../middleware/auth.middleware.js';
 
 const driverRouter = Router();
 
-// Location update endpoint: Sirf valid DRIVER role wala logged-in user hit kar sakta hai
+// Only DRIVER can push location
 driverRouter.post(
   '/location',
   verifyJWT,
@@ -12,10 +12,11 @@ driverRouter.post(
   DriverController.updateLocation
 );
 
-// Nearby drivers endpoint: Koi bhi authenticated user (rider/driver) search kar sakta hai
+// Only RIDER can discover nearby drivers
 driverRouter.get(
   '/nearby',
   verifyJWT,
+  authorizeRole('RIDER'),
   DriverController.getNearbyDrivers
 );
 

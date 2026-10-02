@@ -12,13 +12,13 @@ export class AuthService {
     const accessToken = jwt.sign(
       { userId, role },
       process.env.ACCESS_TOKEN_SECRET || 'access_secret',
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '15m' }
+      { expiresIn: (process.env.ACCESS_TOKEN_EXPIRY || '15m') as any }
     );
 
     const refreshToken = jwt.sign(
       { userId, role },
       process.env.REFRESH_TOKEN_SECRET || 'refresh_secret',
-      { expiresIn: process.env.REFRESH_TOKEN_EXPIRY || '7d' }
+      { expiresIn: (process.env.REFRESH_TOKEN_EXPIRY || '7d') as any }
     );
 
     return { accessToken, refreshToken };
@@ -116,7 +116,7 @@ export class AuthService {
 
 
   // Current authenticated user ko database se fetch karna
-static async getUserById(userId: string): Promise<Omit<User, 'password_hash' | 'refresh_token'>> {
+  static async getUserById(userId: string): Promise<Omit<User, 'password_hash' | 'refresh_token'>> {
   const query = `
     SELECT id, name, email, role, created_at 
     FROM users 

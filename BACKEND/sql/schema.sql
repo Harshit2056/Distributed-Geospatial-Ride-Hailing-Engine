@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(150) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role user_role NOT NULL DEFAULT 'RIDER',
+    refresh_token TEXT, -- Dual-token rotation ke liye refresh token store karna
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -29,3 +30,4 @@ CREATE TABLE IF NOT EXISTS rides (
 CREATE INDEX IF NOT EXISTS idx_rides_status ON rides(status);
 CREATE INDEX IF NOT EXISTS idx_rides_rider_id ON rides(rider_id);
 CREATE INDEX IF NOT EXISTS idx_rides_driver_id ON rides(driver_id);
+CREATE INDEX IF NOT EXISTS idx_users_refresh_token ON users(refresh_token);

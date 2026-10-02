@@ -3,11 +3,17 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiError.js';
 import { AuthService } from '../services/auth.service.js';
-import { UserRole, AuthRequest, User } from '../types/auth.types.js';
-import { pool } from '../config/db.js';
+import { UserRole, AuthRequest } from '../types/auth.types.js';
+
+const accessTokenCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  maxAge: 15 * 60 * 1000, // 15 Minutes
+};
 
 // Production Cookie Settings
-const cookieOptions = {
+const refreshTokencookieOptions = {
   httpOnly: true, // JavaScript client-side is cookie ko chori nahi kar sakta (XSS protection)
   secure: process.env.NODE_ENV === 'production', // HTTPS only in production
   sameSite: 'strict' as const, // CSRF attacks prevention
@@ -42,7 +48,9 @@ export class AuthController {
     
 
     // Refresh token ko direct HTTP-Only cookie mein attach karna
-    res.cookie('refreshToken', authData.tokens.refreshToken, cookieOptions);
+    res.cookie('refreshToken', authData.tokens.refreshToken, refreshTokencookieOptions);
+    res.cookie('accessToken', authData.tokens.accessToken, accessTokenCookieOptions)
+        
 
     return res.status(200).json(
       new ApiResponse(
@@ -70,7 +78,8 @@ export class AuthController {
     const newTokens = await AuthService.refreshAccessToken(incomingRefreshToken as string);
 
     // Naya refresh token wapas cookie mein replace kar do (Token Rotation)
-    res.cookie('refreshToken', newTokens.refreshToken, cookieOptions);
+    res.cookie('refreshToken', newTokens.refreshToken, refreshTokencookieOptions);
+    
 
     return res.status(200).json(
       new ApiResponse(
@@ -86,8 +95,13 @@ export class AuthController {
       await AuthService.logoutUser(req.user.userId);
     }
 
+    const options = {
+        httpOnly:true,
+        secure:true
+    }
+
     // Cookie ko destroy/clear karna
-    res.clearCookie('refreshToken', cookieOptions);
+    res.clearCookie('refreshToken', options);
 
     return res.status(200).json(
       new ApiResponse(200, null, 'User logged out successfully')

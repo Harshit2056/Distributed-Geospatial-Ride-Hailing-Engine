@@ -55,15 +55,19 @@ export class DriverController {
       throw new ApiError(400, 'Query parameters must be valid numbers');
     }
 
+    const currentUserId = req.user?.userId;
     const drivers = await GeoService.findNearbyDrivers(lat, lon, rings);
+
+    // Filter out the requesting user (agar same user driver pool me register ho)
+    const filteredDrivers = drivers.filter((d) => d.driverId !== currentUserId);
 
     return res.status(200).json(
       new ApiResponse(
         200,
         {
-          totalNearby: drivers.length,
+          totalNearby: filteredDrivers.length,
           ringSizeUsed: rings,
-          drivers,
+          drivers: filteredDrivers,
         },
         'Nearby drivers fetched successfully via H3 grid'
       )

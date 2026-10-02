@@ -5,16 +5,20 @@ import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const verifyJWT = asyncHandler(async (req: AuthRequest, _res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
+  // 1. Token pehle Authorization header se dhoondhein, warna cookie se lein (accessToken)
+  const token =
+    req.header('Authorization')?.replace('Bearer ', '').trim() ||
+    req.cookies?.accessToken;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  // 2. Agar token nahi mila toh 401 throw karein
+  if (!token) {
     throw new ApiError(401, 'Unauthorized request: Missing or invalid token format');
   }
 
-  const token = authHeader.split(' ')[1];
   const secret = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
 
   try {
+    // 3. Direct clean token verify karein
     const decoded = jwt.verify(token, secret) as JwtPayload;
     req.user = decoded;
     next();

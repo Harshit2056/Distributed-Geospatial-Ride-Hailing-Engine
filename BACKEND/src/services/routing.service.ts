@@ -9,6 +9,15 @@ const __dirname = path.dirname(__filename);
 
 export class RoutingService {
   /**
+   * Wrapper for calculating shortest path dynamically
+   */
+  static async calculateShortestPath(startNode: number, endNode: number): Promise<RouteCalculationOutput> {
+    // For now we create a dummy graph to satisfy the worker requirements
+    const dummyGraph: RoadNetworkGraph = {};
+    return this.runDijkstra(dummyGraph, startNode, endNode);
+  }
+
+  /**
    * Worker thread me Dijkstra algorithm run karta hai
    */
   static runDijkstra(
