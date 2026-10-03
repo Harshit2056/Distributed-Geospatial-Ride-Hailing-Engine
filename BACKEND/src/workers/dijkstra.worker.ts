@@ -1,5 +1,5 @@
 import { parentPort, workerData } from 'worker_threads';
-import { RouteCalculationInput, RouteCalculationOutput, RoadNetworkGraph } from '../types/routing.types.js';
+import type { RouteCalculationInput, RouteCalculationOutput, RoadNetworkGraph } from '../types/routing.types.js';
 
 // Simple Priority Queue implementation for Dijkstra
 class MinPriorityQueue {

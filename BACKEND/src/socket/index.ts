@@ -23,11 +23,22 @@ export const initSocket = (httpServer: HttpServer): Server => {
   // Attach Redis Adapter for Multi-Server Horizontal Scaling
   io.adapter(createAdapter(pubClient, subClient));
 
-  // Socket Authentication Middleware
+    // Socket Authentication Middleware
   io.use((socket: AuthenticatedSocket, next) => {
+    // 1. Auth payload, 2. Header, 3. Cookie header teeno check karein
+    const rawCookie = socket.handshake.headers.cookie;
+    let cookieToken: string | undefined;
+
+    if (rawCookie) {
+      const match = rawCookie.match(/accessToken=([^;]+)/);
+      if (match) cookieToken = match[1];
+    }
+
     const token =
       socket.handshake.auth?.token ||
-      socket.handshake.headers?.authorization?.replace('Bearer ', '');
+      socket.handshake.headers?.authorization?.replace('Bearer ', '').trim() ||
+      (socket.handshake.headers?.accesstoken as string) ||
+      cookieToken;
 
     if (!token) {
       return next(new Error('Authentication error: Token required'));

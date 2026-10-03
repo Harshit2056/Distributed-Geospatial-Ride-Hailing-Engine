@@ -1,7 +1,7 @@
 import { Worker } from 'worker_threads';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { RouteCalculationInput, RouteCalculationOutput, RoadNetworkGraph } from '../types/routing.types.js';
+import type { RouteCalculationInput, RouteCalculationOutput, RoadNetworkGraph } from '../types/routing.types.js';
 import { ApiError } from '../utils/ApiError.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,7 +37,7 @@ export class RoutingService {
       const worker = new Worker(workerFilePath, {
         workerData,
         // TypeScript execution ke liye execArgv agar tsx active hai
-        execArgv: isTypeScript ? ['--loader', 'tsx'] : undefined,
+        execArgv: isTypeScript ? ['--import', 'tsx'] : undefined,
       });
 
       worker.on('message', (result: RouteCalculationOutput) => {
