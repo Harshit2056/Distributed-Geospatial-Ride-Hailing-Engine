@@ -6,6 +6,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { RideRecord, RideRequestPayload, RideStatus } from '../types/ride.types.js';
 import { getIO } from '../socket/index.js';
 import { SurgeService } from './surge.service.js';
+import { PaymentService } from './payment.service.js';
 
 export class RideService {
   // Finite State Machine Allowed Transitions
@@ -151,8 +152,17 @@ export class RideService {
       const updatedRide: RideRecord = updateResult.rows[0];
 
       // Driver lock release on completion/cancellation
-      if ((newStatus === 'COMPLETED' || newStatus === 'CANCELLED') && currentRide.driver_id) {
+      if (newStatus === 'COMPLETED' && currentRide.driver_id) {
+        // 1. Redis Mutex release
         await redis.del(`lock:driver:${currentRide.driver_id}`);
+
+        // 2. Trigger Payment Settlement
+        await PaymentService.processRidePayment(
+          rideId,
+          currentRide.rider_id,
+          currentRide.driver_id,
+          Number(currentRide.fare)
+        );
       }
 
       // Real-time notification: Room aur dono users ko state transition broadcast karein
