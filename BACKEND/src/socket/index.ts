@@ -61,7 +61,7 @@ export const initSocket = (httpServer: HttpServer): Server => {
     // Har user ko uski specific room me join karwayein (direct messaging ke liye)
     const userRoom = `user:${user.userId}`;
     socket.join(userRoom);
-    console.log(`⚡ User connected to socket: ${user.userId} (${user.role})`);
+    console.log(` User connected to socket: ${user.userId} (${user.role})`);
 
     // Ride-specific room join karne ka event
     socket.on('join_ride', (rideId: string) => {

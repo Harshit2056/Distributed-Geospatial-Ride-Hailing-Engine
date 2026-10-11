@@ -1,5 +1,6 @@
 import { redis} from '../config/redis.js';
 import { latLngToCell, gridDisk } from 'h3-js';
+import { aiDemandService, surgePredictionResult } from './aiDemand.service.js';
 
 export class SurgeService {
   private static readonly H3_RESOLUTION = 8;
@@ -18,7 +19,7 @@ export class SurgeService {
   }
 
   // 2. Multiplier calculate karna
-  static async getSurgeMultiplier(lat: number, lon: number): Promise<{ multiplier: number; h3Index: string }> {
+  static async getSurgeMultiplier(lat: number, lon: number): Promise<{ multiplier: number; h3Index: string; aiInsights?:surgePredictionResult }> {
     const h3Index = latLngToCell(lat, lon, this.H3_RESOLUTION);
     const neighborCells = gridDisk(h3Index, 1);
 
@@ -33,20 +34,18 @@ export class SurgeService {
     const demandCountRaw = await redis.get(`surge:demand:${h3Index}`);
     const demandCount = demandCountRaw ? parseInt(demandCountRaw, 10) : 1;
 
-    // Minimum supply floor (taaki zero se divide na ho)
-    const effectiveSupply = Math.max(totalAvailableDrivers, 1);
-    const demandSupplyRatio = demandCount / effectiveSupply;
+    // ai predective surge evaluation
 
-    let multiplier = 1.0;
+    const aiPrediction = await aiDemandService.predictSurge({
+      h3Index,
+      currentSupply: totalAvailableDrivers,
+      currentDemand: demandCount,
+    })
 
-    if (demandSupplyRatio > 3.5) {
-      multiplier = 2.5; // Max surge cap
-    } else if (demandSupplyRatio > 2.0) {
-      multiplier = 1.8;
-    } else if (demandSupplyRatio > 1.2) {
-      multiplier = 1.3;
-    }
-
-    return { multiplier, h3Index };
+    return {
+      multiplier: aiPrediction.predictedMultiplier,
+      h3Index,
+      aiInsights: aiPrediction,
+    };
   }
 }
