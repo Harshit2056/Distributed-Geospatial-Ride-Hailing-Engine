@@ -4,16 +4,7 @@ import { driverApi, rideApi } from '../services/api';
 import { getSocket } from '../services/socket';
 import { useAuth } from '../context/AuthContext';
 import { MapView } from './MapView';
-import {
-  Power,
-  Navigation,
-  Car,
-  BellRing,
-  Play,
-  CheckCircle,
-  AlertTriangle,
-  Zap,
-} from 'lucide-react';
+import { Power, Navigation, Play, CheckCircle } from 'lucide-react';
 
 export const DriverDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -186,45 +177,36 @@ export const DriverDashboard: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full p-4 lg:p-6 max-w-7xl mx-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-full p-4 lg:p-6 max-w-7xl mx-auto">
       {/* Driver Controls (Left column) */}
-      <div className="lg:col-span-5 flex flex-col space-y-5">
+      <div className="lg:col-span-5 flex flex-col space-y-4">
         {/* Duty Status Card */}
-        <div className="bg-gray-900 border border-gray-800 rounded-3xl p-5 shadow-xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
-                <Car className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-white">Driver Console</h2>
-                <p className="text-xs text-gray-400">
-                  H3 Cell Index:{' '}
-                  <span className="font-mono text-amber-400 font-semibold">
-                    {lastH3Cell || 'Registering...'}
-                  </span>
-                </p>
-              </div>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-800">
+            <div>
+              <h2 className="text-base font-semibold text-white">Driver Console</h2>
+              <p className="text-xs text-gray-400">
+                H3 Cell: <span className="font-mono text-gray-300">{lastH3Cell || 'Locating...'}</span>
+              </p>
             </div>
 
             {/* Online Toggle Switch */}
             <button
               onClick={() => setIsOnline(!isOnline)}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-2xl font-bold text-xs transition border active:scale-95 ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg font-semibold text-xs transition border ${
                 isOnline
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                   : 'bg-gray-800 text-gray-400 border-gray-700 hover:text-white'
               }`}
             >
-              <Power className="h-4 w-4" />
-              <span>{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+              <Power className="h-3.5 w-3.5" />
+              <span>{isOnline ? 'Online' : 'Offline'}</span>
             </button>
           </div>
 
-          {/* Quick Telemetry status */}
-          <div className="mt-4 p-3.5 rounded-2xl bg-gray-950 border border-gray-800 flex items-center justify-between text-xs">
-            <span className="text-gray-400">Current GPS Telemetry:</span>
-            <span className="font-mono text-gray-200">
+          <div className="flex justify-between items-center text-xs text-gray-400">
+            <span>Current GPS:</span>
+            <span className="font-mono text-gray-300">
               {currentLocation.latitude.toFixed(4)}, {currentLocation.longitude.toFixed(4)}
             </span>
           </div>
@@ -232,41 +214,35 @@ export const DriverDashboard: React.FC = () => {
 
         {/* Incoming Ride Alert Modal / Card */}
         {incomingRide && (
-          <div className="bg-amber-950/30 border-2 border-amber-500 rounded-3xl p-5 shadow-2xl animate-bounce-slow">
-            <div className="flex items-center space-x-2 text-amber-400 font-extrabold text-sm mb-3">
-              <BellRing className="h-5 w-5 animate-pulse" />
-              <span>NEW RIDE ASSIGNMENT ALERT!</span>
+          <div className="bg-gray-900 border-2 border-blue-500 rounded-xl p-4 shadow-md">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-wide">
+                New Ride Request
+              </span>
+              <span className="text-lg font-bold text-white">₹{incomingRide.fare}</span>
             </div>
 
-            <div className="space-y-2 text-xs text-gray-300">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Estimated Fare:</span>
-                <span className="text-lg font-black text-emerald-400">₹{incomingRide.fare}</span>
+            <div className="space-y-1 text-xs text-gray-300 mb-3">
+              <div>
+                <span className="text-gray-400">Pickup: </span>
+                <span className="font-mono">{incomingRide.pickup.latitude.toFixed(3)}, {incomingRide.pickup.longitude.toFixed(3)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Pickup Coords:</span>
-                <span className="font-mono">
-                  {incomingRide.pickup.latitude.toFixed(3)}, {incomingRide.pickup.longitude.toFixed(3)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Dropoff Coords:</span>
-                <span className="font-mono">
-                  {incomingRide.dropoff.latitude.toFixed(3)}, {incomingRide.dropoff.longitude.toFixed(3)}
-                </span>
+              <div>
+                <span className="text-gray-400">Dropoff: </span>
+                <span className="font-mono">{incomingRide.dropoff.latitude.toFixed(3)}, {incomingRide.dropoff.longitude.toFixed(3)}</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={handleAcceptRide}
-                className="py-2.5 rounded-xl font-bold text-xs text-gray-950 bg-amber-400 hover:bg-amber-300 transition text-center shadow-lg shadow-amber-400/20"
+                className="py-2 rounded-lg font-semibold text-xs text-white bg-blue-600 hover:bg-blue-500 transition text-center"
               >
-                Accept Trip
+                Accept
               </button>
               <button
                 onClick={() => setIncomingRide(null)}
-                className="py-2.5 rounded-xl font-semibold text-xs text-gray-400 bg-gray-800 hover:bg-gray-700 transition text-center"
+                className="py-2 rounded-lg font-semibold text-xs text-gray-400 bg-gray-800 hover:bg-gray-700 transition text-center"
               >
                 Decline
               </button>
@@ -274,101 +250,83 @@ export const DriverDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Active Trip FSM Control Panel */}
+        {/* Active Trip Control Panel */}
         {activeTrip ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-3xl p-5 shadow-xl space-y-4 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                Current Active Trip
-              </span>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-800">
+              <span className="text-xs font-semibold text-gray-400 uppercase">Active Trip</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">
                 {activeTrip.status}
               </span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-gray-950 border border-gray-800 space-y-1.5 text-xs">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Trip Fare:</span>
-                <span className="text-emerald-400 font-extrabold text-sm">₹{activeTrip.fare}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Rider ID:</span>
-                <span className="font-mono text-gray-300">{activeTrip.rider_id.slice(0, 12)}...</span>
-              </div>
+            <div className="flex justify-between text-xs text-gray-300">
+              <span className="text-gray-400">Trip Fare:</span>
+              <span className="text-base font-bold text-emerald-400">₹{activeTrip.fare}</span>
             </div>
 
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center space-x-2">
-                <AlertTriangle className="h-4 w-4 shrink-0" />
-                <span>{errorMsg}</span>
+              <div className="p-2 rounded bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+                {errorMsg}
               </div>
             )}
 
             {/* Telemetry Simulator Buttons */}
             {activeTrip.status !== 'COMPLETED' && (
-              <div className="pt-2">
-                <button
-                  onClick={isSimulatingMove ? stopDriveSimulation : startDriveSimulation}
-                  className={`w-full py-2.5 rounded-xl font-semibold text-xs transition border flex items-center justify-center space-x-2 ${
-                    isSimulatingMove
-                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
-                      : 'bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700'
-                  }`}
-                >
-                  <Navigation className="h-4 w-4" />
-                  <span>
-                    {isSimulatingMove
-                      ? 'Simulating GPS Stream (Pause)'
-                      : activeTrip.status === 'MATCHED'
-                      ? 'Simulate Drive to Pickup'
-                      : 'Simulate Drive to Destination'}
-                  </span>
-                </button>
-              </div>
+              <button
+                onClick={isSimulatingMove ? stopDriveSimulation : startDriveSimulation}
+                className="w-full py-2 rounded-lg font-medium text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 transition flex items-center justify-center space-x-1.5"
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                <span>
+                  {isSimulatingMove
+                    ? 'Pause GPS Simulation'
+                    : activeTrip.status === 'MATCHED'
+                    ? 'Simulate Drive to Pickup'
+                    : 'Simulate Drive to Dropoff'}
+                </span>
+              </button>
             )}
 
             {/* FSM Progression Buttons */}
             {activeTrip.status === 'MATCHED' && (
               <button
                 onClick={() => handleTransitionStatus('IN_TRANSIT')}
-                className="w-full py-3 rounded-2xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-500 active:scale-98 shadow-lg shadow-blue-600/30 transition flex items-center justify-center space-x-2"
+                className="w-full py-2.5 rounded-lg font-semibold text-xs text-white bg-blue-600 hover:bg-blue-500 transition flex items-center justify-center space-x-1.5"
               >
-                <Play className="h-4 w-4 fill-white" />
-                <span>Start Trip (Pickup Completed)</span>
+                <Play className="h-3.5 w-3.5 fill-white" />
+                <span>Start Trip (Pickup Done)</span>
               </button>
             )}
 
             {activeTrip.status === 'IN_TRANSIT' && (
               <button
                 onClick={() => handleTransitionStatus('COMPLETED')}
-                className="w-full py-3 rounded-2xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-500 active:scale-98 shadow-lg shadow-emerald-600/30 transition flex items-center justify-center space-x-2"
+                className="w-full py-2.5 rounded-lg font-semibold text-xs text-white bg-emerald-600 hover:bg-emerald-500 transition flex items-center justify-center space-x-1.5"
               >
-                <CheckCircle className="h-4 w-4" />
-                <span>Complete Trip & Collect Fare</span>
+                <CheckCircle className="h-3.5 w-3.5" />
+                <span>Complete Trip</span>
               </button>
             )}
 
             {activeTrip.status === 'COMPLETED' && (
-              <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 text-center">
-                <p className="text-emerald-400 font-bold text-sm">🎉 Trip Completed Successfully!</p>
-                <p className="text-xs text-gray-400 mt-1">₹{activeTrip.fare} credited to Driver wallet</p>
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-center">
+                <p className="text-emerald-400 font-semibold text-xs">Trip Completed!</p>
                 <button
                   onClick={() => setActiveTrip(null)}
-                  className="mt-3 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gray-800 hover:bg-gray-700 transition"
+                  className="mt-2 text-xs text-gray-400 hover:text-white underline"
                 >
-                  Ready for Next Ride
+                  Clear and wait for next ride
                 </button>
               </div>
             )}
           </div>
         ) : (
-          <div className="bg-gray-900 border border-gray-800 rounded-3xl p-8 text-center text-gray-500 shadow-xl">
-            <Zap className="h-8 w-8 text-amber-500/50 mx-auto mb-2 animate-pulse" />
-            <p className="font-semibold text-gray-300 text-sm">Waiting for Ride Assignments...</p>
-            <p className="text-xs text-gray-500 mt-1">
-              Keep duty ONLINE. Rides in your H3 hexagon cell will be dispatched to you automatically via Redis & Socket.io.
-            </p>
-          </div>
+          !incomingRide && (
+            <div className="p-6 bg-gray-900 border border-gray-800 rounded-xl text-center">
+              <p className="text-gray-400 text-xs">Waiting for new ride requests...</p>
+            </div>
+          )
         )}
       </div>
 

@@ -46,3 +46,16 @@ export interface AssignedRidePayload {
   fare: number;
   status?: RideStatus;
 }
+
+export interface AiSurgeInsights {
+  predictedMultiplier: number;
+  demandTrend: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  recommendedDriverRelocationCount: number;
+  reasoning: string;
+}
+
+export interface SurgeData {
+  multiplier: number;
+  h3Index: string;
+  aiInsights?: AiSurgeInsights;
+}

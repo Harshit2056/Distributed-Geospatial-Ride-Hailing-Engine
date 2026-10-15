@@ -3,40 +3,32 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents 
 import L from 'leaflet';
 import type { LocationCoordinate } from '../types';
 
-// Custom modern SVG icons using L.divIcon
+// Custom clean map icons using L.divIcon
 const createCustomIcon = (type: 'pickup' | 'dropoff' | 'driver' | 'nearby') => {
   let innerHtml = '';
 
   if (type === 'pickup') {
     innerHtml = `
-      <div class="relative flex items-center justify-center w-8 h-8">
-        <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
-        <div class="relative inline-flex items-center justify-center rounded-full h-7 w-7 bg-emerald-600 text-white font-bold text-xs shadow-lg border-2 border-white">
-          P
-        </div>
+      <div style="background-color: #10b981; color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; border: 2px solid #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+        P
       </div>
     `;
   } else if (type === 'dropoff') {
     innerHtml = `
-      <div class="relative flex items-center justify-center w-8 h-8">
-        <div class="relative inline-flex items-center justify-center rounded-full h-7 w-7 bg-rose-600 text-white font-bold text-xs shadow-lg border-2 border-white">
-          D
-        </div>
+      <div style="background-color: #ef4444; color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; border: 2px solid #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+        D
       </div>
     `;
   } else if (type === 'driver') {
     innerHtml = `
-      <div class="relative flex items-center justify-center w-10 h-10">
-        <span class="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60 animate-pulse"></span>
-        <div class="relative inline-flex items-center justify-center rounded-full h-8 w-8 bg-amber-500 text-gray-900 shadow-xl border-2 border-gray-950 text-sm">
-          🚕
-        </div>
+      <div style="background-color: #f59e0b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+        🚕
       </div>
     `;
   } else {
     // Nearby taxi
     innerHtml = `
-      <div class="flex items-center justify-center w-6 h-6 rounded-full bg-slate-800 border border-amber-400 text-xs shadow-md">
+      <div style="background-color: #1f2937; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1.5px solid #9ca3af;">
         🚕
       </div>
     `;
@@ -45,8 +37,8 @@ const createCustomIcon = (type: 'pickup' | 'dropoff' | 'driver' | 'nearby') => {
   return L.divIcon({
     html: innerHtml,
     className: 'custom-leaflet-marker',
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
   });
 };
 
@@ -162,32 +154,18 @@ export const MapView: React.FC<MapViewProps> = ({
           </Marker>
         )}
 
-        {/* Dijkstra Shortest Path Road Navigation Polyline */}
+        {/* Road Navigation Polyline */}
         {routeCoordinates && routeCoordinates.length > 1 ? (
-          <>
-            {/* Outer road boundary glow */}
-            <Polyline
-              positions={routeCoordinates}
-              pathOptions={{
-                color: '#1d4ed8',
-                weight: 8,
-                opacity: 0.85,
-                lineJoin: 'round',
-                lineCap: 'round',
-              }}
-            />
-            {/* Inner neon navigation beam */}
-            <Polyline
-              positions={routeCoordinates}
-              pathOptions={{
-                color: '#60a5fa',
-                weight: 4,
-                opacity: 1,
-                lineJoin: 'round',
-                lineCap: 'round',
-              }}
-            />
-          </>
+          <Polyline
+            positions={routeCoordinates}
+            pathOptions={{
+              color: '#2563eb',
+              weight: 5,
+              opacity: 0.9,
+              lineJoin: 'round',
+              lineCap: 'round',
+            }}
+          />
         ) : (
           pickup &&
           dropoff && (

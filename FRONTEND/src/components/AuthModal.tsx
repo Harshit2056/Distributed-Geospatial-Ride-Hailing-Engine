@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import type { UserRole } from '../types';
-import { X, Lock, Mail, User as UserIcon, Shield } from 'lucide-react';
+import { X, Lock, Mail, User as UserIcon } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -46,26 +46,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="relative w-full max-w-sm bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-gray-400 hover:text-white p-1.5 rounded-full hover:bg-gray-800 transition"
+          className="absolute top-4 right-4 text-gray-400 hover:text-white p-1 rounded hover:bg-gray-800 transition"
         >
           <X className="h-5 w-5" />
         </button>
 
         {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex p-3 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 mb-3">
-            <Shield className="h-6 w-6" />
-          </div>
-          <h3 className="text-2xl font-bold text-white tracking-tight">
-            {isRegister ? 'Create an Account' : 'Sign In to Your Account'}
+        <div className="mb-5">
+          <h3 className="text-lg font-bold text-white">
+            {isRegister ? 'Create Account' : 'Sign In'}
           </h3>
-          <p className="text-xs text-gray-400 mt-1">
-            Enter your credentials to access the mobility platform
+          <p className="text-xs text-gray-400 mt-0.5">
+            {isRegister ? 'Enter your details to register.' : 'Enter your email and password to continue.'}
           </p>
         </div>
 
