@@ -49,4 +49,19 @@ export class RideController {
       new ApiResponse(200, updatedRide, `Ride status updated to ${status}`)
     );
   });
+
+  static getActiveRide = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.userId;
+    const role = req.user?.role;
+
+    if (!userId) {
+      throw new ApiError(401, 'Unauthorized request: Missing user identity');
+    }
+
+    const activeRide = await RideService.getActiveRideForUser(userId, role || 'RIDER');
+
+    return res.status(200).json(
+      new ApiResponse(200, activeRide, 'Active ride fetched successfully')
+    );
+  });
 }

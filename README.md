@@ -32,5 +32,21 @@ cd BACKEND
 # 4. Create environment file
 # Copy .env.example to .env and fill required values
 
-# 5. Start the application
-docker compose up --build -d
+# 5. Start the backend application
+npm run dev
+
+# 6. Start the frontend application (in a new terminal)
+cd ../FRONTEND
+npm install
+npm run dev
+```
+
+---
+
+## 💻 Frontend Client (Vite + React + Leaflet + Tailwind CSS)
+
+The interactive dashboard provides:
+- **Rider Interface**: Interactive Leaflet map with pickup/dropoff pinning, dynamic fare estimate, AI surge multiplier ($1.0\times - 2.5\times$), nearby driver radar, and live telemetry tracking.
+- **Driver Interface**: Duty switch (Online/Offline), incoming ride assignment alerts with sound/animation, live GPS telemetry simulation, and FSM trip controls (`MATCHED` ➔ `IN_TRANSIT` ➔ `COMPLETED`).
+- **1-Click Demo Accounts**: Instant test login for both Rider and Driver with zero configuration needed.
+

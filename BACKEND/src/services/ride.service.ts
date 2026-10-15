@@ -19,13 +19,13 @@ export class RideService {
   };
 
   static async requestAndMatchRide(riderId: string, payload: RideRequestPayload): Promise<RideRecord> {
-    const { pickup, dropoff, pickupNodeId, dropoffNodeId } = payload;
+    const { pickup, dropoff } = payload;
 
     // 1. Demand record karein (Surge metric window)
     await SurgeService.recordRideDemand(pickup.latitude, pickup.longitude);
 
-    // 2. Dijkstra shortest path distance nikaalein
-    const routeResult = await RoutingService.calculateShortestPath(pickupNodeId, dropoffNodeId);
+    // 2. Dijkstra shortest path distance nikaalein (Delhi NCR Road Graph)
+    const routeResult = await RoutingService.calculateRouteBetweenPoints(pickup, dropoff);
     const baseFare = 50.0;
     const perUnitDistanceRate = 12.5;
     const rawFare = baseFare + routeResult.distance * perUnitDistanceRate;
@@ -88,6 +88,17 @@ export class RideService {
       if (matchedDriverId) {
         await GeoService.removeDriverLocation(matchedDriverId);
 
+        // Fetch driver info for rider UI clarity
+        try {
+          const driverRes = await pool.query('SELECT name, email FROM users WHERE id = $1;', [matchedDriverId]);
+          if (driverRes.rows.length > 0) {
+            (createdRide as any).driver_name = driverRes.rows[0].name;
+            (createdRide as any).driver_email = driverRes.rows[0].email;
+          }
+        } catch (e) {
+          console.warn('Could not fetch driver profile for ride:', e);
+        }
+
         try {
           const io = getIO();
           // Matched driver ke private room me alert bhejein
@@ -111,6 +122,39 @@ export class RideService {
     } finally {
       client.release();
     }
+  }
+
+  /**
+   * Fetch the active ride for either RIDER or DRIVER to restore state on login/refresh
+   */
+  static async getActiveRideForUser(userId: string, role: string): Promise<any | null> {
+    let query: string;
+    let values: any[];
+
+    if (role === 'DRIVER') {
+      query = `
+        SELECT r.*, u.name as rider_name, u.email as rider_email
+        FROM rides r
+        JOIN users u ON r.rider_id = u.id
+        WHERE r.driver_id = $1 AND r.status IN ('MATCHED', 'IN_TRANSIT')
+        ORDER BY r.created_at DESC
+        LIMIT 1;
+      `;
+      values = [userId];
+    } else {
+      query = `
+        SELECT r.*, d.name as driver_name, d.email as driver_email
+        FROM rides r
+        LEFT JOIN users d ON r.driver_id = d.id
+        WHERE r.rider_id = $1 AND r.status IN ('REQUESTED', 'MATCHED', 'IN_TRANSIT')
+        ORDER BY r.created_at DESC
+        LIMIT 1;
+      `;
+      values = [userId];
+    }
+
+    const result = await pool.query(query, values);
+    return result.rows.length > 0 ? result.rows[0] : null;
   }
 
   static async updateRideStatus(rideId: string, newStatus: RideStatus, _requesterId: string): Promise<RideRecord> {

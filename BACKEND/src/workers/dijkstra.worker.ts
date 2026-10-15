@@ -119,10 +119,13 @@ function calculateDijkstra(graph: RoadNetworkGraph, start: number, end: number):
 
   const totalCost = distances[end] === Infinity || distances[end] === undefined ? -1 : distances[end];
 
+  // Realistic city transit ETA: 28 km/h average traffic speed -> seconds = (km / 28) * 3600
+  const etaSeconds = totalCost > 0 ? Math.round((totalCost / 28) * 3600) : 0;
+
   return {
     path,
     distance: totalCost,
-    etaSeconds: Math.round(totalCost * 1.2), // Simple ETA conversion
+    etaSeconds,
   };
 }
 

@@ -8,6 +8,9 @@ const rideRouter = Router();
 // Only RIDER can request a ride
 rideRouter.post('/request', verifyJWT, authorizeRole('RIDER'), rateLimiter({ windowInSeconds: 60, maxRequests: 5 }), RideController.requestRide);
 
+// Fetch active ongoing ride for logged in user (Rider or Driver)
+rideRouter.get('/active', verifyJWT, RideController.getActiveRide);
+
 // Both RIDER or DRIVER can update status (FSM handles valid transitions)
 rideRouter.patch('/:rideId/status', verifyJWT, RideController.updateStatus);
 

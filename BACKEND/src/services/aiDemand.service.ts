@@ -64,7 +64,7 @@ export class aiDemandService {
 
             //fallback calculation in case of rate limits
             const fallbackRatio = currentDemand/Math.max(currentSupply,1);
-            const fallbackMultiplier = fallbackRatio > 3 ? 2.2 : (fallbackRatio > 1.5 ? 1.5 :1);
+            const fallbackMultiplier = fallbackRatio > 3 ? 2.5 : (fallbackRatio > 1.5 ? 1.5 :1);
 
             return {
                 predictedMultiplier : fallbackMultiplier ,

@@ -1,10 +1,17 @@
 export interface GraphEdge {
   node: number;
-  weight: number; // travel time (seconds) ya distance (meters)
+  weight: number; // travel distance (km) or duration
 }
 
 export interface RoadNetworkGraph {
   [nodeId: number]: GraphEdge[];
+}
+
+export interface RoadNodeInfo {
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface RouteCalculationInput {
@@ -17,4 +24,6 @@ export interface RouteCalculationOutput {
   path: number[];
   distance: number;
   etaSeconds: number;
+  coordinates?: [number, number][];
+  waypoints?: RoadNodeInfo[];
 }
